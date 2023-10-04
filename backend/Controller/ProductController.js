@@ -7,7 +7,7 @@ const v = new Validator();
 const prisma = new PrismaClient();
 
 const schema = {
-    nama_produk: {type: "string", optional: false, empty: false, max: "100"},
+    nama_produk: {type: "string", optional: false, empty: false},
     harga: {type: "number", empty: false, optional: false, min: "1000"},
     kategori_id: {type: "number", empty: false, optional: false, max: "100"},
     status_id: {type: "number", empty: false, optional: false, max: "100"},
@@ -59,15 +59,23 @@ export const createProduct = async (req, res) => {
         if (validate.length) {
             return res.status(400).json({
                 status: 'error',
-                message: validate,
+                message: (validate),
             });
         }
 
         const {nama_produk, harga, kategori_id, status_id} = req.body;
 
         const product = await prisma.product.create({
-            data: {nama_produk, harga, kategori_id, status_id},
+            data: {nama_produk : nama_produk, harga: harga, kategori_id : kategori_id, status_id: status_id},
         });
+
+        if(!product){
+            res.status(400).json({
+                status: 'error',
+                data: product,
+                message: 'Gagal menambahkan product'
+            })
+        }
 
         res.status(201).json({
             status: 'success',

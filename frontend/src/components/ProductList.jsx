@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import {Link} from "react-router-dom";
+import React, {useState, useEffect} from 'react';
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
-import useSWR from "swr";
+import useSWR, {mutate} from "swr";
+import {toast} from "react-toastify";
 
 
 const ProductList = () => {
@@ -9,8 +10,9 @@ const ProductList = () => {
         const res = await axios.get('http://localhost:4000/api/v1/product');
         return res.data;
     };
+    const navigate = useNavigate()
 
-    const { data } = useSWR('products', fetcher);
+    const {data} = useSWR('products', fetcher);
 
     const [filteredProducts, setFilteredProducts] = useState([]); // state untuk menyimpan product yang bisa dijual
 
@@ -29,11 +31,17 @@ const ProductList = () => {
         const confirmed = window.confirm('Are you sure you want to delete this product?');
         if (confirmed) {
             try {
-                await axios.delete(`http://localhost:5000/api/v1/product/${id}`);
-                // Refresh the page
-                window.location.reload();
+                await axios.delete(`http://localhost:4000/api/v1/product/${id}`);
+                mutate('products');
+                navigate('/');
+                toast.success("Berhasil menghapus data !", {
+                    position: toast.POSITION.TOP_CENTER,
+                });
             } catch (error) {
-                console.log(error);
+                toast.error("Tidak berhasil menghapus datamu !", {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 3000,
+                });
             }
         }
     }
@@ -60,15 +68,16 @@ const ProductList = () => {
                         {filteredProducts.map((product) => (
                             <tr key={product.id} className='bg-white border-b'>
                                 <td className='px-1 py-3 text-center'>{product.id}</td>
-                                <td className='px-6 py-3 font-medium text-gray-900'>{product.nama_produk}</td>
+                                <td className='px-4 py-3 font-medium text-gray-900'>{product.nama_produk}</td>
                                 <td className='px-6 py-3'>{product.harga}</td>
                                 <td className='px-1 py-3 text-center'>{product.kategori.nama_kategori}</td>
                                 <td className='px-1 py-3 text-center'>{product.status.nama_status}</td>
                                 <td className='px-1 py-3 text-center'>
-                                    <Link to={`/product/edit/${product.id}`}
+                                    <Link to={`/edit/${product.id}`}
                                           className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-1'>Edit</Link>
                                     <button onClick={() => deleteProduct(product.id)}
-                                          className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'>Delete</button>
+                                            className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded'>Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}
