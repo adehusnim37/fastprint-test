@@ -1,8 +1,6 @@
 ﻿# fastprint-test
 ## Installation
 
-**BEFORE YOU INSTALL:** please read the [prerequisites](#prerequisites)
-
 Start with cloning this repo on your local machine:
 
 ```sh
